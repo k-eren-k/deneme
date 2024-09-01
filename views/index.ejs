@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sohbet Uygulaması</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: #333;
+        }
+        #roomControls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #roomControls input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        #roomControls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        #roomControls button:hover {
+            background-color: #0056b3;
+        }
+        #chat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #videoContainer {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        video {
+            width: 45%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #000;
+        }
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            margin-bottom: 10px;
+        }
+        #messages li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        #messageInput {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        #sendMessage {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        #sendMessage:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sohbet Uygulaması</h1>
+
+    <div id="roomControls">
+        <button id="createRoom">Oda Oluştur</button>
+        <input type="text" id="roomCode" placeholder="Oda Kodu" />
+        <button id="joinRoom">Odaya Katıl</button>
+    </div>
+
+    <div id="chat" style="display:none;">
+        <div id="videoContainer">
+            <video id="localVideo" autoplay muted></video>
+            <video id="remoteVideo" autoplay></video>
+        </div>
+        <ul id="messages"></ul>
+        <input type="text" id="messageInput" placeholder="Mesajınızı yazın..." />
+        <button id="sendMessage">Gönder</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const messageInput = document.getElementById('messageInput');
+        const messages = document.getElementById('messages');
+        let localStream;
+        let peerConnection;
+        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+        document.getElementById('createRoom').addEventListener('click', () => {
+            socket.emit('createRoom', (roomCode) => {
+                alert('Oda oluşturuldu: ' + roomCode);
+                document.getElementById('roomCode').value = roomCode;
+            });
+        });
+
+        document.getElementById('joinRoom').addEventListener('click', () => {
+            const roomCode = document.getElementById('roomCode').value;
+            if (roomCode) {
+                startMedia().then(() => {
+                    socket.emit('joinRoom', roomCode);
+                    document.getElementById('chat').style.display = 'block';
+                });
+            }
+        });
+
+        async function startMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+                setupPeerConnection();
+            } catch (error) {
+                console.error('Kamera ve mikrofon erişimi alınamadı:', error);
+            }
+        }
+
+        function setupPeerConnection() {
+            peerConnection = new RTCPeerConnection(configuration);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.ontrack = (event) => {
+                remoteVideo.srcObject = event.streams[0];
+            };
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit('signal', {
+                        roomCode: document.getElementById('roomCode').value,
+                        signalData: { candidate: event.candidate }
+                    });
+                }
+            };
+
+            socket.on('signal', (data) => {
+                if (data.offer) {
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    peerConnection.createAnswer().then(answer => {
+                        peerConnection.setLocalDescription(answer);
+                        socket.emit('signal', {
+                            roomCode: document.getElementById('roomCode').value,
+                            signalData: { answer: answer }
+                        });
+                    });
+                } else if (data.answer) {
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                } else if (data.candidate) {
+                    peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            });
+        }
+
+        document.getElementById('sendMessage').addEventListener('click', () => {
+            const message = messageInput.value;
+            const roomCode = document.getElementById('roomCode').value;
+            if (message && roomCode) {
+                socket.emit('sendMessage', roomCode, message);
+                messageInput.value = '';
+            }
+        });
+
+        socket.on('message', (message) => {
+            const li = document.createElement('li');
+            li.textContent = message;
+            messages.appendChild(li);
+        });
+    </script>
+</body>
+</html>
