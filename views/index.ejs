@@ -1,203 +1,715 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sohbet Uygulaması</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            margin: 20px 0;
-            color: #333;
-        }
-        #roomControls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        #roomControls input {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
-        }
-        #roomControls button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        #roomControls button:hover {
-            background-color: #0056b3;
-        }
-        #chat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #videoContainer {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-        video {
-            width: 45%;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: #000;
-        }
-        #messages {
-            list-style-type: none;
-            padding: 0;
-            width: 100%;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: #fff;
-            margin-bottom: 10px;
-        }
-        #messages li {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        #messageInput {
-            width: calc(100% - 22px);
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        #sendMessage {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            background-color: #28a745;
-            color: white;
-            cursor: pointer;
-        }
-        #sendMessage:hover {
-            background-color: #218838;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gösteri Ses Kontrol Sayfası</title>
+  <link rel="icon" type="image/x-icon" href="https://bogazkalecpal.meb.k12.tr/tema/tema/3/img/meb_logo.png">
+
+  <link href="
+https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.1.0/600.min.css
+" rel="stylesheet">
+  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v6.0.0-beta1/css/all.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+    * {
+      font-family: "Poppins", serif;
+    }
+
+    /* General Styles */
+    body {
+      background-color: #FFFFFF;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px;
+      height: auto;
+    }
+
+    .music-list {
+      height: 400px;
+      overflow-y: scroll;
+      background-color: #ffffff;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.041);
+      border: 1px solid #E4E4E7;
+      border-radius: 8px;
+      padding: 30px;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    h3 {
+      margin-top: -0px;
+      font-weight: 600;
+      color: #081024;
+    }
+
+    .song-item {
+      padding-left: 20px;
+      padding-right: 20px;
+      border-radius: 110px;
+      display: flex;
+      cursor: pointer;
+      align-items: center;
+      gap: 16px;
+      margin-top: 2.5px;
+    }
+
+    .song-item:hover {
+      background-color: rgba(0, 0, 0, 0.048);
+    }
+
+    .song-item img {
+      object-fit: cover;
+      height: 45px;
+      transition: all 0.15s ease;
+      width: 45px;
+    }
+
+    .song-item img:hover {
+      transform: scale(1.02);
+    }
+
+    audio {
+      display: none;
+    }
+
+    .play-button {
+      font-size: 24px;
+      color: #4b5563;
+      cursor: pointer;
+    }
+
+    .play-button span.play-icon {
+      display: inline-block;
+    }
+
+    .play-button span.pause-icon {
+      display: none;
+    }
+
+    .song-details {
+      flex: 1;
+      display: flex;
+    }
+
+    .song-details h3 {
+      font-weight: 600;
+    }
+
+    .volume-button {
+      font-size: 24px;
+      color: #4b5563;
+      cursor: pointer;
+    }
+
+    .volume-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.596);
+      z-index: 10;
+    }
+
+    .volume-modal .modal-content {
+      background-color: #ffffff;
+      padding: 30px;
+      border: 1px solid #8B8B8C;
+      border-radius: 15px;
+      width: 320px;
+      text-align: center;
+    }
+
+    .volume-modal .modal-content h4 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .volume-slider {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .volume-level {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .fade-out-settings {
+      display: none;
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    .fade-out-settings label {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .fade-out-settings input[type="number"] {
+      width: calc(100% - 16px);
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .fade-out-settings input[type="number"]:focus {
+      color: #081024;
+      outline: 1px solid #E4E4E7;
+    }
+
+    .header-modal {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      margin-top: -25px;
+    }
+
+    .modal-button {
+      margin-top: 16px;
+      padding: 8px 16px;
+      color: rgba(0, 0, 0, 0.377);
+      background-color: transparent;
+      border-radius: 4px;
+      font-size: 15.5px;
+      cursor: pointer;
+    }
+
+    .modal-button:hover {
+      color: black;
+      background-color: #0000001f;
+    }
+
+    /* Form Styles */
+    .song-upload-form {
+      margin-top: 32px;
+      background-color: #ffffff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .song-upload-form input[type="text"],
+    .song-upload-form input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .song-upload-form button {
+      padding: 8px 16px;
+      background-color: #3b82f6;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .song-upload-form button:hover {
+      background-color: #2563eb;
+    }
+
+    h4 {
+      font-weight: 500;
+      font-size: 16px;
+      color: #081024c7;
+    }
+
+    button {
+      border: none;
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      cursor: pointer;
+      width: 40px;
+    }
+
+    button i {
+      color: rgba(0, 0, 0, 0.733);
+      font-size: 15.4px;
+    }
+
+    button span {
+      color: rgba(0, 0, 0, 0.733);
+      font-size: 15.4px;
+    }
+
+    button:hover {
+      background-color: rgba(0, 0, 0, 0.089);
+      border-radius: 15px;
+      display: flex;
+      height: 40px;
+      width: 40px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .trim-controls {
+      position: relative;
+      height: 20px;
+      margin-left: 30px;
+      width: 100%;
+      padding-left: 20px;
+      padding-right: 20px;
+      margin-right: 30px;
+      margin: 10px 0;
+    }
+
+    .flex {
+      width: 100%;
+      display: flex;
+      margin-top: 15px;
+      align-items: center;
+      justify-content: left;
+      gap: 2px;
+    }
+
+    .flex span {
+      font-size: 14px;
+      color: #999999;
+      font-weight: 400;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      /* Varsayılan stil kaldırılır */
+      width: 100%;
+      height: 10px;
+      /* İnputun yüksekliği */
+      background-color: #b5b9c042;
+      /* Arkaplan rengi */
+      backdrop-filter: blur(10px);
+      border-radius: 100px;
+      /* Köşeleri yuvarlama */
+      outline: none;
+    }
+
+    /* Kaydırıcı çubuğun yuvarlak kısmı */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      /* Varsayılan stil kaldırılır */
+      width: 20px;
+      /* Genişlik */
+      height: 20px;
+      /* Yükseklik */
+      border-radius: 50%;
+      /* Tam daire */
+      background-color: #FFFFFF;
+      /* Beyaz renk */
+      border: 2px solid #6B7280;
+      cursor: pointer;
+    }
+
+    input[type="number"]::-webkit-slider-thumb {
+      border: 2px solid #F2F2F3;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      cursor: pointer;
+    }
+
+    .sound-sett {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sound-sett i {
+      font-size: 19.5px;
+    }
+
+    .sound-sett span {
+      color: rgba(0, 0, 0, 0.534);
+      font-weight: 400;
+      font-size: 16.5px;
+    }
+
+    @media (max-width: 768px) {
+      .left-right{
+        display: none;
+      }
+
+      .song-details{
+        width: 100%;
+        margin-right: auto;
+
+      }
+
+      .song-details h4{
+        width: 100%;
+      }
+    }
     </style>
 </head>
+
 <body>
-    <h1>Sohbet Uygulaması</h1>
-
-    <div id="roomControls">
-        <button id="createRoom">Oda Oluştur</button>
-        <input type="text" id="roomCode" placeholder="Oda Kodu" />
-        <button id="joinRoom">Odaya Katıl</button>
-    </div>
-
-    <div id="chat" style="display:none;">
-        <div id="videoContainer">
-            <video id="localVideo" autoplay muted></video>
-            <video id="remoteVideo" autoplay></video>
+  <div class="container">
+    <div class="music-list">
+      <h3>Gösteri Müzik Listesi</h3>
+      <% songs.forEach((song, index) => { %>
+      <div class="song-item">
+        <img src="https://i.hizliresim.com/fkbw8pl.png?_gl=1*1vg8chf*_ga*MTk0NDQzNzcxOC4xNzI4MjQ2NjA4*_ga_M9ZRXYS2YN*MTczMDkyNDA2OS4zLjEuMTczMDkyNDA4My40Ni4wLjA." alt="Song image">
+        <audio id="audio-<%= index %>" src="<%= song.filePath %>" type="audio/mpeg"></audio>
+        <div class="song-details">
+          <h4><%= song.title %></h4>
         </div>
-        <ul id="messages"></ul>
-        <input type="text" id="messageInput" placeholder="Mesajınızı yazın..." />
-        <button id="sendMessage">Gönder</button>
+
+        <button style="margin-right: -15px;" onclick="playPrevious(<%= index %>)" class="nav-button left-right" >
+          <i class="fa-regular fa-backward-step"></i>
+        </button>
+        <button onclick="togglePlay(<%= index %>)" id="play-button-<%= index %>" class="play-button " >
+          <span class="play-icon"><i class="fa-regular fa-play"></i></span>
+          <span class="pause-icon"><i class="fa-regular fa-pause"></i></span>
+        </button>
+        <button style="margin-left: -15px; margin-right: 10px;" onclick="playNext(<%= index %>)" class="nav-button left-right">
+          <i class="fa-regular fa-forward-step"></i>
+        </button>
+
+        <button style="margin-left: -10px;" onclick="toggleVolumeMenu(<%= index %>)" class="volume-button"><i class="fa-regular fa-gear"></i></button>
+        <div id="volume-modal-<%= index %>" class="volume-modal">
+          <div class="modal-content">
+            <div class="header-modal">
+              <h4>Ses Düzeyi Ayarı</h4>
+              <button onclick="closeVolumeMenu(<%= index %>)" class="modal-button"><i class="fa-sharp fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="sound-sett">
+              <i class="fa-light fa-headphones"></i>
+              <div class="trim-controls">
+                <input type="range" id="start-handle-<%= index %>" min="0" max="100" step="0.1" value="0" oninput="updateStartTrim(<%= index %>, this.value)">
+              </div>
+              <div class="time-display">
+                <span id="start-time-<%= index %>">0:00</span>
+              </div>
+            </div>
+            <div class="sound-sett">
+              <i class="fa-light fa-timer"></i>
+              <input style="margin-left: 20px; margin-right: 20px;" type="range" id="progress-bar-<%= index %>" class="progress-bar" min="0" max="100" step="0.1" value="0" oninput="seekAudio(<%= index %>, this.value)">
+              <div class="time-display">
+                <span id="current-time-<%= index %>">0:00</span>
+              </div>
+            </div>
+            <div class="sound-sett">
+              <i class="fa-light fa-volume"></i>
+              <input style="min-width: calc(205px + 16px + 4px); max-width: calc(205px + 16px + 4px); margin-left: 20px; margin-right: 20px; margin-top: 15px;" type="range" min="0" max="100" step="1" class="volume-slider" onchange="adjustVolume(<%= index %>, this.value)" oninput="updateVolumeDisplay(<%= index %>, this.value)">
+              <span id="volume-level-<%= index %>">100%</span>
+            </div>
+
+
+            <label class="flex items-center mt-4">
+              <input type="checkbox" id="fade-out-checkbox-<%= index %>" onchange="toggleFadeOut(<%= index %>)">
+              <span class="ml-2">Bitirirken Kıs</span>
+            </label>
+            <div id="fade-out-settings-<%= index %>" class="fade-out-settings">
+              <label for="fade-time-<%= index %>">Son Kaç Saniyede Kısılacak:</label>
+              <input type="number" id="fade-time-<%= index %>" value="5" min="1" max="30" onchange="updateFadeTime(<%= index %>, this.value)">
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const messageInput = document.getElementById('messageInput');
-        const messages = document.getElementById('messages');
-        let localStream;
-        let peerConnection;
-        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+  </div>
 
-        document.getElementById('createRoom').addEventListener('click', () => {
-            socket.emit('createRoom', (roomCode) => {
-                alert('Oda oluşturuldu: ' + roomCode);
-                document.getElementById('roomCode').value = roomCode;
-            });
-        });
+  <script>
+    let fadeTimeouts = {}; // Stores fade-out timers for each song
+    let startTimes = {}; // Stores the start trim values for each song
+    let endTimes = {}; // Stores the end trim values for each song
 
-        document.getElementById('joinRoom').addEventListener('click', () => {
-            const roomCode = document.getElementById('roomCode').value;
-            if (roomCode) {
-                startMedia().then(() => {
-                    socket.emit('joinRoom', roomCode);
-                    document.getElementById('chat').style.display = 'block';
-                });
-            }
-        });
+    function togglePlay(index) {
+      const audio = document.getElementById(`audio-${index}`);
+      const playButton = document.getElementById(`play-button-${index}`);
+      const playIcon = playButton.querySelector(".play-icon");
+      const pauseIcon = playButton.querySelector(".pause-icon");
 
-        async function startMedia() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVideo.srcObject = localStream;
-                setupPeerConnection();
-            } catch (error) {
-                console.error('Kamera ve mikrofon erişimi alınamadı:', error);
-            }
-        }
+      if (!startTimes[index]) startTimes[index] = 0;
+      if (!endTimes[index]) endTimes[index] = audio.duration;
 
-        function setupPeerConnection() {
-            peerConnection = new RTCPeerConnection(configuration);
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+      if (audio.paused) {
+        audio.currentTime = startTimes[index];
+        audio.play();
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'inline-block';
 
-            peerConnection.ontrack = (event) => {
-                remoteVideo.srcObject = event.streams[0];
-            };
+        audio.ontimeupdate = () => {
+          if (audio.currentTime >= endTimes[index]) {
+            audio.pause();
+            audio.currentTime = startTimes[index];
+            playIcon.style.display = 'inline-block';
+            pauseIcon.style.display = 'none';
+          }
+          updateProgressBar(index);
+        };
+      } else {
+        audio.pause();
+        playIcon.style.display = 'inline-block';
+        pauseIcon.style.display = 'none';
+      }
+    }
 
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('signal', {
-                        roomCode: document.getElementById('roomCode').value,
-                        signalData: { candidate: event.candidate }
-                    });
-                }
-            };
+    function updateStartTrim(index, value) {
+      const audio = document.getElementById(`audio-${index}`);
+      startTimes[index] = (value / 100) * audio.duration;
+      document.getElementById(`start-time-${index}`).textContent = formatTime(startTimes[index]);
+    }
 
-            socket.on('signal', (data) => {
-                if (data.offer) {
-                    peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                    peerConnection.createAnswer().then(answer => {
-                        peerConnection.setLocalDescription(answer);
-                        socket.emit('signal', {
-                            roomCode: document.getElementById('roomCode').value,
-                            signalData: { answer: answer }
-                        });
-                    });
-                } else if (data.answer) {
-                    peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                } else if (data.candidate) {
-                    peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                }
-            });
-        }
+    function updateEndTrim(index, value) {
+      const audio = document.getElementById(`audio-${index}`);
+      endTimes[index] = (value / 100) * audio.duration;
+      document.getElementById(`end-time-${index}`).textContent = formatTime(endTimes[index]);
+    }
 
-        document.getElementById('sendMessage').addEventListener('click', () => {
-            const message = messageInput.value;
-            const roomCode = document.getElementById('roomCode').value;
-            if (message && roomCode) {
-                socket.emit('sendMessage', roomCode, message);
-                messageInput.value = '';
-            }
-        });
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secondsLeft = Math.floor(seconds % 60);
+      return `${minutes}:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
+    }
 
-        socket.on('message', (message) => {
-            const li = document.createElement('li');
-            li.textContent = message;
-            messages.appendChild(li);
-        });
-    </script>
+    // Ses düzeyini ayarlamak için fonksiyon
+    function adjustVolume(index, value) {
+      const audio = document.getElementById(`audio-${index}`);
+      audio.volume = value / 100; // Ses düzeyini 0-1 arasında ayarlıyoruz
+      updateVolumeDisplay(index, value);
+
+      // Ses düzeyini localStorage'a kaydet
+      saveSongSettings(index, {
+        startTrim: startTimes[index],
+        fadeOut: document.getElementById(`fade-out-checkbox-${index}`).checked,
+        fadeTime: document.getElementById(`fade-time-${index}`).value,
+        volume: value
+      });
+    }
+
+    // Ses düzeyini ayarlamak için fonksiyon
+    function adjustVolume(index, value) {
+      const audio = document.getElementById(`audio-${index}`);
+      audio.volume = value / 100; // Ses düzeyini 0-1 arasında ayarlıyoruz
+      updateVolumeDisplay(index, value);
+
+      // Ses düzeyini localStorage'a kaydet
+      saveSongSettings(index, {
+        startTrim: startTimes[index],
+        fadeOut: document.getElementById(`fade-out-checkbox-${index}`).checked,
+        fadeTime: document.getElementById(`fade-time-${index}`).value,
+        volume: value
+      });
+    }
+
+    // Ses düzeyini ekranda göstermek için
+    function updateVolumeDisplay(index, value) {
+      const volumeLevel = document.getElementById(`volume-level-${index}`);
+      volumeLevel.textContent = `${value}%`;
+    }
+
+    function updateProgressBar(index) {
+      const audio = document.getElementById(`audio-${index}`);
+      const progressBar = document.getElementById(`progress-bar-${index}`);
+      const currentTimeDisplay = document.getElementById(`current-time-${index}`);
+      const totalDurationDisplay = document.getElementById(`total-duration-${index}`);
+
+      progressBar.value = (audio.currentTime / audio.duration) * 100 || 0;
+      currentTimeDisplay.textContent = formatTime(audio.currentTime);
+      totalDurationDisplay.textContent = formatTime(audio.duration);
+    }
+
+    function seekAudio(index, value) {
+      const audio = document.getElementById(`audio-${index}`);
+      audio.currentTime = (value / 100) * audio.duration;
+    }
+
+    function playPrevious(currentIndex) {
+      const prevIndex = currentIndex - 1 < 0 ? document.querySelectorAll('audio').length - 1 : currentIndex - 1;
+      togglePlay(prevIndex);
+    }
+
+    function playNext(currentIndex) {
+      const nextIndex = currentIndex + 1 >= document.querySelectorAll('audio').length ? 0 : currentIndex + 1;
+      togglePlay(nextIndex);
+    }
+
+    function toggleVolumeMenu(index) {
+      const volumeModal = document.getElementById(`volume-modal-${index}`);
+      volumeModal.style.display = volumeModal.style.display === "flex" ? "none" : "flex";
+    }
+
+    function closeVolumeMenu(index) {
+      const volumeModal = document.getElementById(`volume-modal-${index}`);
+      volumeModal.style.display = "none";
+    }
+
+
+    function toggleFadeOut(index) {
+      const fadeOutSettings = document.getElementById(`fade-out-settings-${index}`);
+      const fadeOutCheckbox = document.getElementById(`fade-out-checkbox-${index}`);
+
+      if (fadeOutCheckbox.checked) {
+        fadeOutSettings.style.display = 'block'; // Show the fade-out settings
+      } else {
+        fadeOutSettings.style.display = 'none'; // Hide the fade-out settings
+      }
+    }
+  </script>
+  <script>
+    // Ayarları kaydetmek için
+
+    // Ayarları kaydetmek için
+    function saveSongSettings(index, settings) {
+      let savedSettings = JSON.parse(localStorage.getItem('songSettings')) || {};
+      savedSettings[index] = settings;
+      localStorage.setItem('songSettings', JSON.stringify(savedSettings));
+    }
+
+    // Sayfa yüklendiğinde ses düzeyini yüklemek için
+    function loadSongSettings(index) {
+      const savedSettings = JSON.parse(localStorage.getItem('songSettings')) || {};
+      const audio = document.getElementById(`audio-${index}`);
+
+      if (savedSettings[index]) {
+        const {
+          volume
+        } = savedSettings[index];
+        audio.volume = volume / 100; // Kaydedilen ses düzeyini uygula
+        document.getElementById(`volume-slider-${index}`).value = volume;
+        updateVolumeDisplay(index, volume);
+      } else {
+        // Eğer localStorage'da ayar yoksa, 100% ses düzeyini uygula
+        audio.volume = 1;
+        document.getElementById(`volume-slider-${index}`).value = 100;
+        updateVolumeDisplay(index, 100);
+      }
+    }
+
+    // Sayfa yüklendiğinde ayarları yükle
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('audio').forEach((audio, index) => {
+        loadSongSettings(index); // Ses düzeyini localStorage'dan yükle
+      });
+
+      // Ses düzeyi slider'ı için event listener
+      document.querySelectorAll('.volume-slider').forEach((slider, index) => {
+        slider.addEventListener('input', (e) => adjustVolume(index, e.target.value));
+      });
+    });
+    // Ses düzeyini güncellemek için
+    function updateVolume(index, value) {
+      const audio = document.getElementById(`audio-${index}`);
+      audio.volume = value / 100; // Ses düzeyini 0-1 arasında ayarlıyoruz
+      document.getElementById(`volume-level-${index}`).textContent = `Volume: ${value}%`;
+
+      // Ayarı kaydet
+      saveSongSettings(index, {
+        startTrim: startTimes[index],
+        fadeOut: document.getElementById(`fade-out-checkbox-${index}`).checked,
+        fadeTime: document.getElementById(`fade-time-${index}`).value,
+        volume: value
+      });
+    }
+
+    function updateStartTrim(index, value) {
+      const audio = document.getElementById(`audio-${index}`);
+      startTimes[index] = (value / 100) * audio.duration;
+      document.getElementById(`start-time-${index}`).textContent = formatTime(startTimes[index]);
+
+      // Ayarı kaydet
+      saveSongSettings(index, {
+        startTrim: startTimes[index],
+        fadeOut: document.getElementById(`fade-out-checkbox-${index}`).checked,
+        fadeTime: document.getElementById(`fade-time-${index}`).value,
+        volume: document.getElementById(`volume-slider-${index}`).value // Ses düzeyini kaydediyoruz
+      });
+    }
+
+    function updateFadeTime(index, value) {
+      // Ayarı kaydet
+      saveSongSettings(index, {
+        startTrim: startTimes[index],
+        fadeOut: document.getElementById(`fade-out-checkbox-${index}`).checked,
+        fadeTime: value,
+        volume: document.getElementById(`volume-slider-${index}`).value
+      });
+    }
+
+    function toggleFadeOut(index) {
+      const fadeOutSettings = document.getElementById(`fade-out-settings-${index}`);
+      const fadeOutCheckbox = document.getElementById(`fade-out-checkbox-${index}`);
+
+      fadeOutSettings.style.display = fadeOutCheckbox.checked ? 'block' : 'none';
+
+      // Ayarı kaydet
+      saveSongSettings(index, {
+        startTrim: startTimes[index],
+        fadeOut: fadeOutCheckbox.checked,
+        fadeTime: document.getElementById(`fade-time-${index}`).value,
+        volume: document.getElementById(`volume-slider-${index}`).value
+      });
+    }
+
+    function loadSongSettings(index) {
+      const savedSettings = JSON.parse(localStorage.getItem('songSettings')) || {};
+
+      if (savedSettings[index]) {
+        const {
+          startTrim,
+          fadeOut,
+          fadeTime,
+          volume
+        } = savedSettings[index];
+
+        // Start Trim ayarını geri yükle
+        startTimes[index] = startTrim;
+        document.getElementById(`start-time-${index}`).textContent = formatTime(startTrim);
+        document.getElementById(`start-handle-${index}`).value = (startTrim / document.getElementById(`audio-${index}`).duration) * 100;
+
+        // Fade-out ayarını geri yükle
+        document.getElementById(`fade-out-checkbox-${index}`).checked = fadeOut;
+        document.getElementById(`fade-time-${index}`).value = fadeTime;
+        toggleFadeOut(index); // Fade-out ayarını göster/gizle
+
+        // Ses düzeyini geri yükle
+        const audio = document.getElementById(`audio-${index}`);
+        audio.volume = volume / 100; // Ses düzeyini 0-1 arasında ayarla
+        document.getElementById(`volume-slider-${index}`).value = volume; // Ses düzeyini slider'a ayarla
+        document.getElementById(`volume-level-${index}`).textContent = `Volume: ${volume}%`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('audio').forEach((audio, index) => {
+        loadSongSettings(index);
+      });
+
+      // Ses düzeyi slider'ı için event listener
+      document.querySelectorAll('.volume-slider').forEach((slider, index) => {
+        slider.addEventListener('input', (e) => updateVolume(index, e.target.value));
+      });
+    });
+  </script>
 </body>
+
 </html>
