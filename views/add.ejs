@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gösteri Ses Ekleme</title>
+  <link rel="icon" type="image/x-icon" href="https://bogazkalecpal.meb.k12.tr/tema/tema/3/img/meb_logo.png">
+  <style>
+    /* Basic page setup */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f5f5f5;
+      margin: 0;
+    }
+
+    /* Song Upload Form Container */
+    .song-upload-form {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 20px 30px;
+      max-width: 400px;
+      width: 86%;
+      text-align: center;
+    }
+
+    /* Form Heading */
+    .song-upload-form h3 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    /* Input Fields */
+    .song-upload-form input[type="text"],
+    .song-upload-form input[type="file"] {
+      width: calc(100% - 24px);
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .song-upload-form input[type="text"]:focus,
+    .song-upload-form input[type="file"]:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+    }
+
+    /* Upload Button */
+    .song-upload-form button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    .song-upload-form button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      width: 100%;
+      background-color: #ddd;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 10px;
+      background-color: #007bff;
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 500px) {
+      .song-upload-form {
+        padding: 20px;
+      }
+
+      .song-upload-form h3 {
+        font-size: 20px;
+      }
+
+      .song-upload-form button[type="submit"] {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="song-upload-form">
+    <h3>Şarkı Ekle</h3>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="text" name="title" placeholder="Şarkı İsmi" required />
+      <input type="file" name="file" accept="audio/*" required />
+      <button type="submit">Şarkıyı Yükle</button>
+      <div class="progress-container">
+        <div class="progress-bar"></div>
+      </div>
+      <div class="progress-text"></div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("uploadForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/songs/add", true);
+
+      // Update progress bar on upload progress
+      xhr.upload.addEventListener("progress", function (event) {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          document.querySelector(".progress-bar").style.width = percentComplete + "%";
+          document.querySelector(".progress-text").innerText = Math.round(percentComplete) + "% yüklendi";
+        }
+      });
+
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          document.querySelector(".progress-text").innerText = "Yükleme tamamlandı!";
+        }
+      };
+
+      // Show progress bar and start upload
+      document.querySelector(".progress-container").style.display = "block";
+      xhr.send(formData);
+    });
+  </script>
+</body>
+</html>
